@@ -107,7 +107,7 @@ def main():
     zoomit = ZoomItService()
     flickr = connect_flickr(settings.FLICKR_API_KEY, settings.FLICKR_API_SECRET)
     user_id = settings.FLICKR_USER
-    
+
     for photo in photo_iter(flickr, user_id):
         photo_id = photo.attrib["id"]
         photo_title = photo.attrib["title"]
