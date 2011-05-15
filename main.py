@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import deepzoom
 import flickrapi
 import logging
@@ -108,7 +111,7 @@ def main():
     logger.addHandler(handler)
 
     # Process
-    user_id = settings.FLICKR_USER_ID
+    user_id = settings.FLICKR_USER
 
     for photo in photo_iter(flickr, user_id):
         photo_id = photo.attrib['id']
