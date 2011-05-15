@@ -1,0 +1,13 @@
+# FLICKR
+FLICKR_API_KEY = ""
+FLICKR_API_SECRET = ""
+FLICKR_USER = ""
+
+# Settings
+LOG_FILE = "zoomit-flickr.log"
+
+# Error handling
+MACHINE_TAG_RETRIES = 5
+DOWNLOAD_RETRIES = 5
+PYRAMID_RETRIES = 3
+DESCRIPTOR_RETRIES = 3
