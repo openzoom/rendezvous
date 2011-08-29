@@ -20,13 +20,13 @@
 #   along with OpenZoom. If not, see <http://www.gnu.org/licenses/>.
 #
 
-import settings
 import flickrapi
 import logging
 import logging.handlers
 import math
 import os
 import os.path
+import settings
 import shutil
 import time
 import urllib
@@ -88,7 +88,6 @@ def connect_flickr(key, secret):
 
 
 LOG_FILENAME = "zoomit-flickr-rendezvous.log"
-PRODUCTION = False
 
 ZOOMIT_ID_TAG = u"zoomit:id=%s"
 
@@ -98,7 +97,8 @@ def main():
     logger.setLevel(logging.DEBUG)
 
     handler = logging.handlers.RotatingFileHandler(settings.LOG_FILE,
-                                                   maxBytes=1024*1024, backupCount=100)
+                                                   maxBytes=1024*1024,
+                                                   backupCount=100)
     formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
     handler.setFormatter(formatter)
     logger.addHandler(handler)
@@ -114,8 +114,8 @@ def main():
 
         print "--------------------------------------------"
 
-        # Skip photo if we found openzoom tags
-        logger.info("Checking machine tags >>> %s"%photo_id)
+        # Skip photo if we found zoomit tags
+        logger.info("Checking machine tags >>> %s" % photo_id)
         obsolete_tag_ids = []
         found_zoom_it_id = False
         zoomit_id = None
@@ -125,11 +125,6 @@ def main():
             raw_tag = tag.attrib["raw"]
             namespace, _, predicate = raw_tag.partition("=")[0].partition(":")
             value = raw_tag.partition("=")[2]
-            if namespace in ["seadragon", "openzoom"] and predicate in ["source", "base16source"]:
-                obsolete_tag_ids.append(tag_id)
-            if namespace == "seadragon" and predicate == "id":
-                zoomit_id = value
-                obsolete_tag_ids.append(tag_id)
             if namespace == "zoomit" and predicate == "id":
                 found_zoom_it_id = True
 
@@ -150,19 +145,19 @@ def main():
                 logger.error("Failed to remove machine tags >>> %s"%photo_id)
 
         if found_zoom_it_id:
-            logger.info("Skipping >>> %s"%photo_id)
+            logger.info("Skipping >>> %s" % photo_id)
             continue
 
         if zoomit_id is None:
             # Get largest Flickr photo URL
             photo_url = get_largest_photo_url(flickr, photo_id)
-            msg = "Found largest Flickr photo URL >>> %s (%s)"%(photo_id, photo_url)
+            msg = "Found largest Flickr photo URL >>> %s (%s)" % (photo_id, photo_url)
             if photo_url is None:
                 logger.warning(msg)
                 continue
             logger.info(msg)
 
-            logger.info("Processing image with Zoom.it API >>> %s"%photo_id)
+            logger.info("Processing image with Zoom.it API >>> %s" % photo_id)
             content = zoomit.get_content_by_url(photo_url)
 
         try:
@@ -175,18 +170,17 @@ def main():
         attempt = 1
         for attempt in xrange(1, settings.MACHINE_TAG_RETRIES + 1):
             try:
-                zoomit_tag = ZOOMIT_ID_TAG%zoomit_id
-                flickr.photos_addTags(photo_id=photo_id, tags=zoomit_tag)
-                logger.info("Setting machine tag >>> %s"%photo_id)
-                found_zoom_it_id = True
+                tag = ZOOMIT_ID_TAG % zoomit_id
+                flickr.photos_addTags(photo_id=photo_id, tags=tag)
+                logger.info("Setting Zoom.it ID machine tag >>> %s" % photo_id)
                 break
             except:
                 timeout = 2**attempt # Wait for 2, 4, 8, 16 seconds...
-                logger.warning("Setting machine tag attempt %s (%d) >>> %s"%(attempt, timeout, photo_id))
+                logger.warning("Setting machine tag attempt %s (%d) >>> %s" % (attempt, timeout, photo_id))
                 time.sleep(timeout)
                 continue
         if attempt == settings.MACHINE_TAG_RETRIES:
-            logger.error("Failed to set machine tag >>> %s"%photo_id)
+            logger.error("Failed to set machine tag >>> %s" % photo_id)
 
     print logger.info("Done.")
 
