@@ -118,7 +118,6 @@ def main():
 
         # Skip photo if we found zoomit tags
         logger.info("Checking machine tags >>> %s" % photo_id)
-        obsolete_tag_ids = []
         found_zoom_it_id = False
         found_zoom_it_base16_id = False
         zoomit_id = None
