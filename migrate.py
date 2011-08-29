@@ -164,11 +164,16 @@ def main():
                     tag = ZOOMIT_ID_TAG % zoomit_id
                     flickr.photos_addTags(photo_id=photo_id, tags=tag)
                     logger.info("Setting Zoom.it ID machine tag >>> %s" % photo_id)
+                    found_zoom_it_id = True
+
                 if not found_zoom_it_base16_id:
                     tag = ZOOMIT_BASE16_ID_TAG % base64.b16encode(zoomit_id)
                     flickr.photos_addTags(photo_id=photo_id, tags=tag)
                     logger.info("Setting Zoom.it Base16 ID machine tag >>> %s" % photo_id)
-                break
+                    found_zoom_it_base16_id = True
+
+                if found_zoom_it_id and found_zoom_it_base16_id:
+                    break
             except:
                 timeout = 2**attempt # Wait for 2, 4, 8, 16 seconds...
                 logger.warning("Setting machine tag attempt %s (%d) >>> %s" % (attempt, timeout, photo_id))
