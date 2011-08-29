@@ -128,22 +128,6 @@ def main():
             if namespace == "zoomit" and predicate == "id":
                 found_zoom_it_id = True
 
-        # Remove obsolete tags
-        for obsolete_tag_id in obsolete_tag_ids:
-            attempt = 1
-            for attempt in xrange(1, settings.MACHINE_TAG_RETRIES + 1):
-                try:
-                    flickr.photos_removeTag(tag_id=obsolete_tag_id)
-                    logger.info("Removing machine tag (%s) >>> %s"%(obsolete_tag_id, photo_id))
-                    break
-                except:
-                    timeout = 2**attempt # Wait for 2, 4, 8, 16 seconds...
-                    logger.warning("Removing machine tag attempt %s (%d) >>> %s"%(attempt, timeout, photo_id))
-                    time.sleep(timeout)
-                    continue
-            if attempt == settings.MACHINE_TAG_RETRIES:
-                logger.error("Failed to remove machine tags >>> %s"%photo_id)
-
         if found_zoom_it_id:
             logger.info("Skipping >>> %s" % photo_id)
             continue
