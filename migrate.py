@@ -128,10 +128,11 @@ def main():
             raw_tag = tag.attrib["raw"]
             namespace, _, predicate = raw_tag.partition("=")[0].partition(":")
             value = raw_tag.partition("=")[2]
-            if namespace == "zoomit" and predicate == "id":
-                found_zoom_it_id = True
-            if namespace == "zoomit" and predicate == "base16id":
-                found_zoom_it_base16_id = True
+            if namespace == "zoomit":
+                if predicate == "id":
+                    found_zoom_it_id = True
+                if predicate == "base16id":
+                    found_zoom_it_base16_id = True
 
         if found_zoom_it_id and found_zoom_it_base16_id:
             logger.info("Skipping >>> %s" % photo_id)
