@@ -20,6 +20,7 @@
 #   along with OpenZoom. If not, see <http://www.gnu.org/licenses/>.
 #
 
+import base64
 import flickrapi
 import logging
 import logging.handlers
@@ -90,6 +91,7 @@ def connect_flickr(key, secret):
 LOG_FILENAME = "zoomit-flickr-rendezvous.log"
 
 ZOOMIT_ID_TAG = u"zoomit:id=%s"
+ZOOMIT_BASE16_ID_TAG = u"zoomit:base16id=%s"
 
 def main():
     # Logging
@@ -118,6 +120,7 @@ def main():
         logger.info("Checking machine tags >>> %s" % photo_id)
         obsolete_tag_ids = []
         found_zoom_it_id = False
+        found_zoom_it_base16_id = False
         zoomit_id = None
 
         for tag in machine_tag_iter(flickr, photo_id):
@@ -127,8 +130,10 @@ def main():
             value = raw_tag.partition("=")[2]
             if namespace == "zoomit" and predicate == "id":
                 found_zoom_it_id = True
+            if namespace == "zoomit" and predicate == "base16id":
+                found_zoom_it_base16_id = True
 
-        if found_zoom_it_id:
+        if found_zoom_it_id and found_zoom_it_base16_id:
             logger.info("Skipping >>> %s" % photo_id)
             continue
 
@@ -154,9 +159,14 @@ def main():
         attempt = 1
         for attempt in xrange(1, settings.MACHINE_TAG_RETRIES + 1):
             try:
-                tag = ZOOMIT_ID_TAG % zoomit_id
-                flickr.photos_addTags(photo_id=photo_id, tags=tag)
-                logger.info("Setting Zoom.it ID machine tag >>> %s" % photo_id)
+                if not found_zoom_it_id:
+                    tag = ZOOMIT_ID_TAG % zoomit_id
+                    flickr.photos_addTags(photo_id=photo_id, tags=tag)
+                    logger.info("Setting Zoom.it ID machine tag >>> %s" % photo_id)
+                if not found_zoom_it_base16_id:
+                    tag = ZOOMIT_BASE16_ID_TAG % base64.b16encode(zoomit_id)
+                    flickr.photos_addTags(photo_id=photo_id, tags=tag)
+                    logger.info("Setting Zoom.it Base16 ID machine tag >>> %s" % photo_id)
                 break
             except:
                 timeout = 2**attempt # Wait for 2, 4, 8, 16 seconds...
