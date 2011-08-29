@@ -1,0 +1,4 @@
+PIL==1.1.7
+flickrapi=1.4.2
+-e git+https://@github.com/openzoom/deepzoom.py.git#egg=deepzoom
+-e git+https://@github.com/openzoom/zoomit-python-sdk.git#egg=zoomit
